@@ -1,24 +1,18 @@
 import ContactForm from 'components/ContactForm/ContactForm';
 import { Filter } from 'components/Filter/Filter';
 import { ContactList } from './components/ContactList/ContactList';
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { nanoid } from 'nanoid';
+import { useSelector, useDispatch } from 'react-redux';
+import { add, remove, filterValue } from './redux/slice';
 import css from './App.module.css';
 
 export default function App() {
-  const initialState = [
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ];
-  const [contacts, setContacts] = useState(() => {
-    return JSON.parse(localStorage.getItem('contacts')) ?? initialState;
-  });
-  const [filter, setFilter] = useState('');
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts);
 
   const handleFilterTextChange = filterText => {
-    setFilter(filterText.target.value);
+    dispatch(filterValue(filterText.target.value));
   };
 
   const handleSubmit = (name, number) => {
@@ -29,11 +23,11 @@ export default function App() {
     ) {
       return alert(`dssd`);
     }
-    setContacts([...contacts, { name, number, id: nanoid() }]);
+    dispatch(add({ id: nanoid(), name: name, number: number }));
   };
 
   const deleteItem = id => {
-    setContacts(contacts.filter(el => el.id !== id));
+    dispatch(remove(id));
   };
 
   useEffect(() => {
@@ -46,15 +40,8 @@ export default function App() {
         <h1>Phonebook</h1>
         <ContactForm onHandleSubmit={handleSubmit} />
         <h2>Contacts</h2>
-        <Filter
-          filter={filter}
-          handleFilterTextChange={handleFilterTextChange}
-        />
-        <ContactList
-          contacts={contacts}
-          filter={filter}
-          deleteItem={deleteItem}
-        />
+        <Filter handleFilterTextChange={handleFilterTextChange} />
+        <ContactList deleteItem={deleteItem} />
       </div>
     </>
   );
